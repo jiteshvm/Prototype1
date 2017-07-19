@@ -1,0 +1,7 @@
+a simple circle using shadertoy
+https://www.shadertoy.com/view/XsjGDt
+
+http://www.geeks3d.com/20130705/shader-library-circle-disc-fake-sphere-in-glsl-opengl-glslhacker/2/
+
+converting shadertoy to unity
+https://alastaira.wordpress.com/2015/08/07/unity-shadertoys-a-k-a-converting-glsl-shaders-to-cghlsl/
