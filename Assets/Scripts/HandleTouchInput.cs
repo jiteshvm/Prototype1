@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class HandleTouchInput : MonoBehaviour {
 
@@ -10,51 +11,43 @@ public class HandleTouchInput : MonoBehaviour {
 
 	public float TimeToTap = 0.2f;
 
-	private string screenLog;
-
-	private Queue LogQueue = new Queue();
-
-	private GUIStyle guiStyle = new GUIStyle();
-
 	public GameObject TapEffect;
 	
 	GameObject TapEffectRef;
 
 	private Vector3 LastTapPos;
 
+    public Vector3 StartScale = new Vector3(1.0f, 1.0f, 1.0f);
+
+    public Vector3 EndScale = new Vector3(5.0f, 5.0f, 5.0f);
+
 	void Start () {
-		guiStyle.normal.textColor = Color.black;
-		guiStyle.fontSize = 12;
+        PoolManager.Instance.Init();
+		
 		if(TapEffect != null) {
-			TapEffectRef = Instantiate(TapEffect, Vector3.zero, Quaternion.identity);
+            TapEffectRef = PoolManager.Spawn(TapEffect, Vector3.zero, Quaternion.identity);
+			//TapEffectRef = Instantiate(TapEffect, Vector3.zero, Quaternion.identity);
 			LastTapPos = Vector3.zero;
 		}
+        //PoolManager.Despawn(TapEffectRef);
 		Debug.Log("(HandleTouchInput.cs) Start");
 	}
-
-	void OnEnable() {
-		Application.logMessageReceived +=HandleLog;
-	}
-
-	void OnDisable() {
-		Application.logMessageReceived -= HandleLog;
-	}
-
+	
 	void Update () {
 		
-		if(Input.GetMouseButtonDown(0))
-		{
-			if(TapEffectRef)
-			{
-				Debug.Log("yes");
-				LastTapPos.x = Input.mousePosition.x;
-				LastTapPos.y = Input.mousePosition.y;
-				LastTapPos.z = 10;
-				if(TapEffectRef)
-					TapEffectRef.transform.position = Camera.main.ScreenToWorldPoint(LastTapPos);
-			}
-					
-		}
+        if (Input.GetMouseButtonDown(0))
+        {
+            //Debug.Log("down");
+            TapEffectRef.transform.localScale = StartScale;
+			LastTapPos.x = Input.mousePosition.x;
+			LastTapPos.y = Input.mousePosition.y;
+			LastTapPos.z = 10;
+			TapEffectRef.transform.position = Camera.main.ScreenToWorldPoint(LastTapPos);
+            DOTween.Clear();
+            TapEffectRef.transform.DOScale(EndScale, 1.0f);
+
+        }
+
 		if(Input.touchCount > 0) {
 			touchDuration += Time.deltaTime;
 			currentTouch = Input.GetTouch(0);
@@ -71,27 +64,6 @@ public class HandleTouchInput : MonoBehaviour {
 		else {
 			touchDuration = 0.0f;
 		}
-	}
-
-	void HandleLog(string logString, string stackTrace, LogType type){
-
-		if(LogQueue.Count >= 8)
-			LogQueue.Dequeue();
-		
-		string newString = "\n [" + type + "] : " + logString;
-		LogQueue.Enqueue(newString);
-		if (type == LogType.Exception)
-		{
-			newString = "\n" + stackTrace;
-			LogQueue.Enqueue(newString);
-		}
-		screenLog = string.Empty;
-		foreach(string mylog in LogQueue){
-			screenLog += mylog;
-		}
-	}
-
-	void OnGUI() {
-		GUILayout.Label(screenLog, guiStyle);
-	}
+        
+    }
 }
