@@ -22,10 +22,10 @@ public class HandleTouchInput : MonoBehaviour {
     public Vector3 EndScale = new Vector3(5.0f, 5.0f, 5.0f);
 
 	void Start () {
-        PoolManager.Instance.Init();
+        //PoolManager.Instance.Init();
 		
 		if(TapEffect != null) {
-            TapEffectRef = PoolManager.Spawn(TapEffect, Vector3.zero, Quaternion.identity);
+            TapEffectRef = PoolManager.Instance.Spawn(TapEffect, Vector3.zero, Quaternion.identity);
 			//TapEffectRef = Instantiate(TapEffect, Vector3.zero, Quaternion.identity);
 			LastTapPos = Vector3.zero;
 		}

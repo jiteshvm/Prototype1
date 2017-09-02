@@ -2,53 +2,31 @@
 using System.Collections.Generic;
 
 
-public class PoolManager : MonoBehaviour
+public class PoolManager : Singleton<PoolManager>
 {
-    protected static PoolManager _instance = null;
-
-	public static PoolManager Instance 
-    {
-        get 
-        {
-            if (_instance == null)
-            {
-                GameObject obj = new GameObject((typeof(PoolManager).ToString()));
-                _instance = obj.AddComponent<PoolManager>();
-                _instance.PoolDictionary = new Dictionary<string, PoolData>();
-				DontDestroyOnLoad(obj);
-            }
-            return _instance;
-        }
-	}
+    protected PoolManager() { }
 	
     private Dictionary<string, PoolData> PoolDictionary;
-    public static int DefaultPoolSize = 1;
+    public int DefaultPoolSize = 1;
 
-
-	public void Init()
-	{
-        Debug.Log("PoolManager Init");
-		// all init tasks go here
-	}
-
-	public static PoolData CreatePool(GameObject poolObj, int poolSize = 1, bool isInfinite = true, int maxPoolSize = 0)
+    public void Awake()
+    {
+        PoolDictionary = new Dictionary<string, PoolData>();
+    }
+    public PoolData CreatePool(GameObject poolObj, int poolSize = 1, bool isInfinite = true, int maxPoolSize = 0)
 	{
 
 		return CreatePool(poolObj.name, poolObj, poolSize, isInfinite, maxPoolSize);
 	}
 
-	public static PoolData CreatePool(string poolName, GameObject poolObj, int poolSize = 1, bool isInfinite = true, int maxPoolSize = 0)
+	public PoolData CreatePool(string poolName, GameObject poolObj, int poolSize = 1, bool isInfinite = true, int maxPoolSize = 0)
 	{
-		// Auto Initialize Recycle Manager if not initialized
-		if (_instance == null)
-			Instance.Init();
-
 		PoolData result = null;
 		if (!TryGetPool(poolName, out result))
 		{
 			result = new PoolData(poolObj, poolSize, isInfinite, maxPoolSize);
 			FillPool(result, poolSize);
-            Instance.PoolDictionary.Add(poolName, result);
+            PoolDictionary.Add(poolName, result);
 			//Debug.Log("[PoolManager] : Pool " + poolName + " created successfully");
 		}
 		return result;
@@ -56,7 +34,7 @@ public class PoolManager : MonoBehaviour
 	}
 
 	// Fills the pool with the given number of objects
-	static void FillPool(PoolData pool, int number)
+	void FillPool(PoolData pool, int number)
 	{
 		for (int i = 0; i < number; ++i)
 		{
@@ -67,23 +45,15 @@ public class PoolManager : MonoBehaviour
 		}
 	}
 
-	public static void DestroyPool(GameObject poolObj)
+	public void DestroyPool(GameObject poolObj)
 	{
 
 		DestroyPool(poolObj.name);
 
 	}
 
-	public static void DestroyPool(string poolName)
+	public void DestroyPool(string poolName)
 	{
-
-		// Return if Recycle Manager not initialized
-		if (_instance == null)
-		{
-			//Debug.Log("[PoolManager] : PoolManager not initialized");
-			return;
-		}
-
 		PoolData pool = null;
 		if (TryGetPool(poolName, out pool))
 		{
@@ -94,22 +64,15 @@ public class PoolManager : MonoBehaviour
 
 			pool.recycledObjects.Clear();
             pool.spawnedObjects.Clear();
-			_instance.PoolDictionary.Remove(poolName);
+			PoolDictionary.Remove(poolName);
             Debug.Log("[PoolManager] : Pool " + poolName + " destroyed successfully");
 		}
 
 	}
 
-	public static void DestroyAllPools()
+	public void DestroyAllPools()
 	{
-		// Return if Recycle Manager not initialized
-		if (_instance == null)
-		{
-			//Debug.Log("[PoolManager] : PoolManager not initialized");
-			return;
-		}
-
-		foreach (KeyValuePair<string, PoolData> kv in _instance.PoolDictionary)
+		foreach (KeyValuePair<string, PoolData> kv in PoolDictionary)
 		{
             foreach (GameObject g in kv.Value.recycledObjects)
 				Destroy(g);
@@ -120,11 +83,11 @@ public class PoolManager : MonoBehaviour
             kv.Value.spawnedObjects.Clear();
 		}
 
-		_instance.PoolDictionary.Clear();
+		PoolDictionary.Clear();
 		//Debug.Log ("[PoolManager] : All Pools destroyed");
 	}
 
-	private static GameObject SpawnFromPool(PoolData pool)
+	private GameObject SpawnFromPool(PoolData pool)
 	{
 
 		GameObject spawnedObj;
@@ -141,13 +104,9 @@ public class PoolManager : MonoBehaviour
 		return spawnedObj;
 	}
 
-	public static GameObject Spawn(GameObject poolObj)
+	public GameObject Spawn(GameObject poolObj)
 	{
 		GameObject spawnedObj;
-
-		// Auto Initialize Recycle Manager if not initialized
-		if (_instance == null)
-			Instance.Init();
 
 		// if pool doesnt exist , create a pool with the default size
 		PoolData pool = null;
@@ -163,13 +122,9 @@ public class PoolManager : MonoBehaviour
 
 	}
 
-	public static GameObject Spawn(GameObject poolObj, Vector3 position, Quaternion rotation)
+	public GameObject Spawn(GameObject poolObj, Vector3 position, Quaternion rotation)
 	{
 		GameObject spawnedObj;
-
-		// Auto Initialize Recycle Manager if not initialized
-		if (_instance == null)
-			Instance.Init();
 
 		// if pool doesnt exist , create a pool with the default size
 		PoolData pool = null;
@@ -190,14 +145,10 @@ public class PoolManager : MonoBehaviour
 	}
 
 
-	public static GameObject Spawn(string poolName)
+	public GameObject Spawn(string poolName)
 	{
 
 		GameObject spawnedObj;
-
-		// Auto Initialize Recycle Manager if not initialized
-		if (_instance == null)
-			Instance.Init();
 
 		// if pool doesnt exist , create a pool with the default size
 		PoolData pool = null;
@@ -216,13 +167,9 @@ public class PoolManager : MonoBehaviour
 		}
 	}
 
-	public static GameObject Spawn(string poolName, Vector3 position, Quaternion rotation)
+	public GameObject Spawn(string poolName, Vector3 position, Quaternion rotation)
 	{
 		GameObject spawnedObj;
-
-		// Auto Initialize Recycle Manager if not initialized
-		if (_instance == null)
-			Instance.Init();
 
 		// if pool doesnt exist , create a pool with the default size
 		PoolData pool = null;
@@ -244,15 +191,8 @@ public class PoolManager : MonoBehaviour
 	}
 
 	// Despawns the object and puts it back in the recycle queue
-	public static void Despawn(GameObject poolObj)
+	public void Despawn(GameObject poolObj)
 	{
-		// Return if Recycle Manager not initialized
-		if (_instance == null)
-		{
-			//Debug.Log("[PoolManager] : PoolManager not initialized");
-			return;
-		}
-
 		PoolData pool = null;
 		if (TryGetPool(poolObj.name, out pool))
 		{
@@ -278,15 +218,8 @@ public class PoolManager : MonoBehaviour
 
 	//public static void DespawnAfterSeconds(GameObject poolObj, )
 	// despawns all the objects that are spawned and puts it back in the recycle queue
-	public static void DespawnAll(GameObject poolObj)
+	public void DespawnAll(GameObject poolObj)
 	{
-		// Return if Recycle Manager not initialized
-		if (_instance == null)
-		{
-			//Debug.Log("PoolManager not initialized");
-			return;
-		}
-
 		PoolData pool = null;
 		if (TryGetPool(poolObj.name, out pool))
 		{
@@ -313,22 +246,16 @@ public class PoolManager : MonoBehaviour
 
 	}
 
-	public static bool ContainsPool(string poolName)
+	public bool ContainsPool(string poolName)
 	{
-		if (_instance.PoolDictionary.ContainsKey(poolName))
+		if (PoolDictionary.ContainsKey(poolName))
 			return true;
 		else
 			return false;
 	}
 
-	public static bool TryGetPool(string poolName, out PoolData pool)
+	public bool TryGetPool(string poolName, out PoolData pool)
 	{
-		return _instance.PoolDictionary.TryGetValue(poolName, out pool);
-	}
-
-	void OnDestroy()
-	{
-        _instance = null;
-		Debug.Log("PoolManager destroyed!");
+		return PoolDictionary.TryGetValue(poolName, out pool);
 	}
 }

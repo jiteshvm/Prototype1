@@ -13,8 +13,6 @@ public class PoolData
 
 	public int maxPoolSize;
 
-	//int objIndex = 0;
-
 	// a queue to hold all the recycled objects
 	public Queue<GameObject> recycledObjects;
 
