@@ -42,7 +42,7 @@ public class HandleTouchInput : MonoBehaviour {
 			LastTapPos.y = Input.mousePosition.y;
 			LastTapPos.z = 10;
 			TapEffectRef.transform.position = Camera.main.ScreenToWorldPoint(LastTapPos);
-            DOTween.Clear();
+            DOTween.Kill(TapEffectRef.transform);
             TapEffectRef.transform.DOScale(EndScale, 1.0f);
 
         }
