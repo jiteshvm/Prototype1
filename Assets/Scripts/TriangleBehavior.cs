@@ -4,10 +4,17 @@ using DG.Tweening;
 
 public class TriangleBehavior : MonoBehaviour {
 
-	void Start () {
-        StartCoroutine("MoveTo");
+	private void Start () {
+        Init();
 	}
-	
+
+
+    public void Init()
+    {
+        gameObject.transform.localScale = new Vector3(5, 5, 1);
+        StartCoroutine("MoveTo");
+    }
+
     IEnumerator MoveTo()
     {
         while(true){
@@ -18,10 +25,6 @@ public class TriangleBehavior : MonoBehaviour {
         }
 
     }
-
-	void Update () {
-		
-	}
 
     private void OnDestroy()
     {

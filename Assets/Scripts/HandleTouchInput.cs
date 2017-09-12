@@ -19,7 +19,9 @@ public class HandleTouchInput : MonoBehaviour {
 
     public Vector3 StartScale = new Vector3(1.0f, 1.0f, 1.0f);
 
-    public Vector3 EndScale = new Vector3(5.0f, 5.0f, 5.0f);
+    public Vector3 EndScale = new Vector3(3.0f, 3.0f, 3.0f);
+
+    TweenParams Params;
 
 	void Start () {
 		
@@ -27,8 +29,10 @@ public class HandleTouchInput : MonoBehaviour {
             TapEffectRef = PoolManager.Instance.Spawn(TapEffect, Vector3.zero, Quaternion.identity);
 			//TapEffectRef = Instantiate(TapEffect, Vector3.zero, Quaternion.identity);
 			LastTapPos = Vector3.zero;
+            LastTapPos.z = 10;
 		}
         //PoolManager.Despawn(TapEffectRef);
+        Params = new TweenParams().SetEase(Ease.InOutSine);
 		Debug.Log("(HandleTouchInput.cs) Start");
 	}
 	
@@ -40,10 +44,9 @@ public class HandleTouchInput : MonoBehaviour {
             TapEffectRef.transform.localScale = StartScale;
 			LastTapPos.x = Input.mousePosition.x;
 			LastTapPos.y = Input.mousePosition.y;
-			LastTapPos.z = 10;
 			TapEffectRef.transform.position = Camera.main.ScreenToWorldPoint(LastTapPos);
             DOTween.Kill(TapEffectRef.transform);
-            TapEffectRef.transform.DOScale(EndScale, 1.0f);
+            TapEffectRef.transform.DOScale(EndScale, 0.5f).SetAs(Params);
 
         }
 
@@ -54,7 +57,6 @@ public class HandleTouchInput : MonoBehaviour {
 				Debug.Log("position : " + currentTouch.position + " , pressure : " + currentTouch.pressure);
 				LastTapPos.x = currentTouch.position.x;
 				LastTapPos.y = currentTouch.position.y;
-				LastTapPos.z = 10;
 				if(TapEffectRef)
 					TapEffectRef.transform.position = Camera.main.ScreenToWorldPoint(LastTapPos);
 				

@@ -23,7 +23,9 @@ public class EnemySpawner : Singleton<EnemySpawner> {
         while(true)
         {
 			Vector3 screenPosition = Camera.main.ScreenToWorldPoint(new Vector3(Random.Range(0, Screen.width), Random.Range(0, Screen.height), 10));
-            PoolManager.Instance.Spawn(EnemyPrefab, screenPosition, Quaternion.AngleAxis(Random.Range(0, 360), Vector3.forward));
+            GameObject spawnedObj = PoolManager.Instance.Spawn(EnemyPrefab, screenPosition, Quaternion.AngleAxis(Random.Range(0, 360), Vector3.forward));
+            TriangleBehavior triBehavior = spawnedObj.GetComponent<TriangleBehavior>();
+            triBehavior.Init();
 			yield return new WaitForSeconds(Random.Range(0.2f, 2.0f));    
         }		
     }
